@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預訂陽台 - 紅河谷秘境</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #cc3333; 
+            --deep-green: #2c5530; 
+            --stone-gray: #7a7a7a; 
+            --light-gray: #f9f9f9; 
+            --text-dark: #1a1a1a;
+            --text-light: #ffffff;
+            --warning-orange: #e67e22;
+            --selected-blue: #2980b9;
+            --range-blue: #ebf5fb;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Montserrat', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            color: var(--text-dark);
+            background-color: var(--light-gray);
+        }
+
+        nav {
+            background-color: rgba(26, 26, 26, 0.95);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        nav a:hover {
+            color: var(--primary-red);
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-red);
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        h2 .room-name {
+            color: var(--deep-green);
+        }
+
+        /* ----- 預訂區塊整體佈局 (左右排版) ----- */
+        .booking-section {
+            padding: 100px 20px 50px;
+            max-width: 1200px;
+            margin: auto;
+            min-height: calc(100vh - 150px);
+        }
+        
+        .booking-container {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        @media (max-width: 850px) {
+            .booking-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ----- 單一月份日曆樣式 ----- */
+        .calendar-wrapper {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .calendar-controls {
+            position: absolute;
+            top: 25px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+            pointer-events: none; 
+        }
+        .calendar-btn {
+            pointer-events: auto; 
+            background: var(--light-gray);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--primary-red);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .calendar-btn:hover {
+            background: var(--primary-red);
+            color: #fff;
+        }
+        .calendar-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            padding: 0 40px; 
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+        .day-name {
+            font-weight: 700;
+            color: var(--stone-gray);
+            padding-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .calendar-day {
+            padding: 8px 0;
+            border-radius: 5px;
+            background: var(--light-gray);
+            font-weight: 700;
+            font-size: 1rem;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 55px;
+            user-select: none;
+        }
+        .calendar-day.empty {
+            background: transparent;
+        }
+        .calendar-day.available {
+            color: var(--deep-green);
+            cursor: pointer;
+        }
+        .calendar-day.available:hover {
+            background: #e8f8f5;
+        }
+        
+        /* 日期選擇狀態 */
+        .calendar-day.selected-start,
+        .calendar-day.selected-end {
+            background-color: var(--selected-blue) !important;
+            color: #fff !important;
+            border-radius: 5px;
+        }
+        .calendar-day.selected-start .status-text,
+        .calendar-day.selected-end .status-text {
+            color: #fff !important;
+        }
+        .calendar-day.in-range {
+            background-color: var(--range-blue) !important;
+            color: var(--selected-blue) !important;
+            border-radius: 0;
+        }
+        .calendar-day.in-range .status-text {
+            color: var(--selected-blue) !important;
+        }
+
+        .calendar-day.booked {
+            color: #a0a0a0;
+            text-decoration: line-through;
+            background: #eaeaea;
+            cursor: not-allowed;
+        }
+        
+        .status-text {
+            font-size: 0.75rem;
+            margin-top: 2px;
+            text-decoration: none !important;
+        }
+        
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot.available { background: var(--deep-green); }
+        .dot.selected { background: var(--selected-blue); }
+        .dot.booked { background: #eaeaea; border: 1px solid #a0a0a0; }
+
+        /* ----- 時段選擇器樣式 ----- */
+        .time-picker-wrapper {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .time-picker-wrapper h4 {
+            text-align: center;
+            color: var(--text-dark);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        .time-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .time-option {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 700;
+            color: var(--stone-gray);
+            user-select: none;
+        }
+        .time-option:hover {
+            border-color: var(--primary-red);
+            color: var(--primary-red);
+        }
+        .time-option.active {
+            background-color: var(--primary-red);
+            color: #fff;
+            border-color: var(--primary-red);
+        }
+
+        /* ----- 預訂表單樣式 ----- */
+        .form-wrapper {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        .form-wrapper h3 {
+            text-align: center;
+            color: var(--primary-red);
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+            color: var(--deep-green);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+        }
+        .form-group input[readonly] {
+            background-color: var(--light-gray);
+            cursor: not-allowed;
+            color: var(--primary-red);
+            font-weight: bold;
+        }
+        .date-range-display {
+            background: #fcf8f2;
+            border: 1px solid #f3e5d8;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+        .date-range-display div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .date-range-display div:last-child {
+            margin-bottom: 0;
+            font-weight: bold;
+            color: var(--primary-red);
+            border-top: 1px dashed #e2d0c0;
+            padding-top: 6px;
+            margin-top: 6px;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-red);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-submit:hover {
+            background-color: #a32727;
+        }
+
+        footer {
+            background-color: var(--text-dark);
+            color: var(--text-light);
+            text-align: center;
+            padding: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">← 返回首頁</a>
+    </nav>
+
+    <section id="booking-section" class="booking-section">
+        <h2>預訂狀況與資料填寫 - <span class="room-name" id="roomTitleName">陽台</span></h2>
+        <p style="text-align:center; margin-bottom:30px;">請在左側日曆依序點選「入住日期」與「退房日期」，並選擇預訂時段。</p>
+        
+        <div class="booking-container">
+            <!-- 左側：單一月份日曆 -->
+            <div class="calendar-wrapper">
+                <div class="calendar-controls">
+                    <button class="calendar-btn" id="prevMonth">&lt;</button>
+                    <button class="calendar-btn" id="nextMonth">&gt;</button>
+                </div>
+                
+                <div class="calendar-title" id="monthYear"></div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+
+                <div class="calendar-legend">
+                    <div class="legend-item"><div class="dot available"></div>可預訂</div>
+                    <div class="legend-item"><div class="dot selected"></div>已選擇期間</div>
+                    <div class="legend-item"><div class="dot booked"></div>已客滿</div>
+                </div>
+
+                <!-- 時段選擇器區塊 -->
+                <div class="time-picker-wrapper">
+                    <h4>選擇預訂時段</h4>
+                    <div class="time-options">
+                        <div class="time-option" data-value="全天">全天</div>
+                        <div class="time-option" data-value="上半天">上半天</div>
+                        <div class="time-option" data-value="下半天">下半天</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：資料填寫表單 (串接 FormSubmit) -->
+            <div class="form-wrapper">
+                <h3>填寫預訂資料</h3>
+                <form id="reservationForm" action="https://formsubmit.co/paihung1214@gmail.com" method="POST">
+                    <!-- FormSubmit 隱藏設定 -->
+                    <input type="hidden" name="_subject" value="【紅河谷秘境】新預訂需求：陽台">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="_next" value="">
+
+                    <div class="form-group">
+                        <label for="bookingSpace">預訂房源</label>
+                        <input type="text" id="bookingSpace" name="預訂房源" value="陽台" readonly>
+                    </div>
+                    
+                    <div class="date-range-display">
+                        <div><span>入住日期：</span><span id="checkInText">未選擇</span></div>
+                        <div><span>退房日期：</span><span id="checkOutText">未選擇</span></div>
+                        <div><span>預訂時段：</span><span id="timeRangeText">未選擇</span></div>
+                        <div><span>預訂天數：</span><span id="nightsText">0 天</span></div>
+                    </div>
+
+                    <!-- 隱藏的輸入欄位供表單送出 -->
+                    <input type="hidden" id="checkInDate" name="入住日期">
+                    <input type="hidden" id="checkOutDate" name="退房日期">
+                    <input type="hidden" id="selectedTimeRange" name="預訂時段">
+                    <input type="hidden" id="bookingNights" name="預訂天數">
+
+                    <div class="form-group">
+                        <label for="userName">姓名</label>
+                        <input type="text" id="userName" name="姓名" placeholder="請輸入您的姓名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPhone">聯絡電話</label>
+                        <input type="tel" id="userPhone" name="聯絡電話" placeholder="請輸入手機號碼" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">電子信箱</label>
+                        <input type="email" id="userEmail" name="email" placeholder="請輸入 Email" required>
+                    </div>
+                    <button type="submit" class="btn-submit">送出預訂需求</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 紅河谷秘境. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript 區塊 -->
+    <script>
+        // 被訂走無法預訂的日期列表 (以入住日為準)
+        const bookedDates = [
+            '2026-08-08',
+            '2026-08-22'
+        ]; 
+
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        // 選擇範圍狀態：startDate, endDate
+        let startDate = null;
+        let endDate = null;
+        let selectedTime = null;
+
+        const gridElement = document.getElementById('calendarGrid');
+        const titleElement = document.getElementById('monthYear');
+        const timeOptions = document.querySelectorAll('.time-option');
+
+        // 時段選擇邏輯
+        timeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除所有 active class
+                timeOptions.forEach(opt => opt.classList.remove('active'));
+                // 加上當前點擊的 active class
+                this.classList.add('active');
+                // 儲存選擇的值
+                selectedTime = this.dataset.value;
+                updateFormDisplay();
+            });
+        });
+
+        function formatDate(year, month, day) {
+            return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+
+        function parseDate(dateStr) {
+            const parts = dateStr.split('-');
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+
+        function renderCalendar(month, year) {
+            gridElement.innerHTML = '';
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            titleElement.textContent = `${year}年 ${month + 1}月`;
+
+            const days = ['日', '一', '二', '三', '四', '五', '六'];
+            days.forEach(day => {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('day-name');
+                dayDiv.textContent = day;
+                gridElement.appendChild(dayDiv);
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.classList.add('calendar-day', 'empty');
+                gridElement.appendChild(emptyDiv);
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('calendar-day');
+                
+                const numSpan = document.createElement('span');
+                numSpan.textContent = i;
+                dayDiv.appendChild(numSpan);
+
+                const dateString = formatDate(year, month, i);
+                const isBooked = bookedDates.includes(dateString);
+
+                const statusSpan = document.createElement('span');
+                statusSpan.classList.add('status-text');
+
+                if (isBooked) {
+                    dayDiv.classList.add('booked');
+                    dayDiv.title = '此日期已被預訂';
+                    statusSpan.textContent = '已滿';
+                    statusSpan.style.color = '#a0a0a0';
+                } else {
+                    dayDiv.classList.add('available');
+                    statusSpan.textContent = '可預訂';
+                    statusSpan.style.color = 'var(--deep-green)';
+
+                    // 高亮已選擇範圍邏輯
+                    if (startDate && dateString === startDate) {
+                        dayDiv.classList.add('selected-start');
+                        statusSpan.textContent = '入住';
+                    }
+                    if (endDate && dateString === endDate) {
+                        dayDiv.classList.add('selected-end');
+                        statusSpan.textContent = '退房';
+                    }
+                    if (startDate && endDate && dateString > startDate && dateString < endDate) {
+                        dayDiv.classList.add('in-range');
+                        statusSpan.textContent = '入住中';
+                    }
+
+                    // 點擊選擇連續日期
+                    dayDiv.onclick = () => handleDateClick(dateString);
+                }
+
+                dayDiv.appendChild(statusSpan);
+                gridElement.appendChild(dayDiv);
+            }
+        }
+
+        function handleDateClick(dateStr) {
+            if (!startDate || (startDate && endDate)) {
+                // 第一下：選擇入住日期，重置退房日期
+                startDate = dateStr;
+                endDate = null;
+            } else if (startDate && !endDate) {
+                // 第二下：選擇退房日期
+                if (dateStr <= startDate) {
+                    // 若點選早於或等於入住日，自動重新設為新的入住日
+                    startDate = dateStr;
+                    endDate = null;
+                } else {
+                    // 檢查期間內是否有已客滿的日期，避免跨越不可預訂的區間
+                    let hasBookedInRange = false;
+                    let check = parseDate(startDate);
+                    const end = parseDate(dateStr);
+                    
+                    while (check <= end) {
+                        const checkStr = formatDate(check.getFullYear(), check.getMonth(), check.getDate());
+                        if (bookedDates.includes(checkStr)) {
+                            hasBookedInRange = true;
+                            break;
+                        }
+                        check.setDate(check.getDate() + 1);
+                    }
+
+                    if (hasBookedInRange) {
+                        alert('您選擇的連續區間內包含已客滿的日期，請重新選擇！');
+                        startDate = dateStr;
+                        endDate = null;
+                    } else {
+                        endDate = dateStr;
+                    }
+                }
+            }
+
+            updateFormDisplay();
+            renderCalendar(currentMonth, currentYear);
+        }
+
+        function updateFormDisplay() {
+            const checkInText = document.getElementById('checkInText');
+            const checkOutText = document.getElementById('checkOutText');
+            const timeRangeText = document.getElementById('timeRangeText');
+            const nightsText = document.getElementById('nightsText');
+            
+            const checkInInput = document.getElementById('checkInDate');
+            const checkOutInput = document.getElementById('checkOutDate');
+            const timeRangeInput = document.getElementById('selectedTimeRange');
+            const bookingNightsInput = document.getElementById('bookingNights');
+
+            // 更新時段顯示
+            if (selectedTime) {
+                timeRangeText.textContent = selectedTime;
+                timeRangeInput.value = selectedTime;
+            } else {
+                timeRangeText.textContent = '未選擇';
+                timeRangeInput.value = '';
+            }
+
+            if (startDate) {
+                checkInText.textContent = startDate;
+                checkInInput.value = startDate;
+            } else {
+                checkInText.textContent = '未選擇';
+                checkInInput.value = '';
+            }
+
+            if (endDate) {
+                checkOutText.textContent = endDate;
+                checkOutInput.value = endDate;
+
+                // 計算天數 (改為天，因為有半天全天的概念)
+                const start = parseDate(startDate);
+                const end = parseDate(endDate);
+                const diffTime = Math.abs(end - start);
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                // 如果只選一天
+                if(diffDays === 0) diffDays = 1;
+
+                nightsText.textContent = `${diffDays} 天`;
+                bookingNightsInput.value = `${diffDays} 天`;
+            } else {
+                checkOutText.textContent = startDate ? '請點選退房日期' : '未選擇';
+                checkOutInput.value = '';
+                nightsText.textContent = '0 天';
+                bookingNightsInput.value = '';
+            }
+        }
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar(currentMonth, currentYear);
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar(currentMonth, currentYear);
+        });
+
+        // 表單送出前檢查日期與時段是否有選擇
+        document.getElementById('reservationForm').addEventListener('submit', function(e) {
+            const checkIn = document.getElementById('checkInDate').value;
+            const checkOut = document.getElementById('checkOutDate').value;
+            const timeRange = document.getElementById('selectedTimeRange').value;
+            
+            if(!checkIn || !checkOut) {
+                e.preventDefault(); 
+                alert('請先在日曆上依序點選「入住」與「退房」日期！');
+                return;
+            }
+            if(!timeRange) {
+                e.preventDefault();
+                alert('請選擇預訂時段（全天、上半天或下半天）！');
+                return;
+            }
+        });
+
+        // 初始渲染
+        renderCalendar(currentMonth, currentYear);
+    </script>
+
+</body>
+</html>
