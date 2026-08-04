@@ -51,8 +51,7 @@
 
         .hero {
             height: 100vh;
-            /* 圖片路徑已修改為相對路徑 */
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('IMG20260502111417.jpg') no-repeat center center;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('file:///C:/IMG20260502111417.jpg') no-repeat center center;
             background-size: cover;
             background-attachment: fixed;
             display: flex;
@@ -265,6 +264,17 @@
             from {transform: scale(0.8)} 
             to {transform: scale(1)}
         }
+
+        /* ----- 延遲載入與滾動顯現動畫 ----- */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -274,9 +284,9 @@
         <a href="#about">關於我們</a>
         <a href="#spaces">房源空間</a>
         <a href="#gallery">周邊景觀</a>
-        <a href="#local-attractions">在地景點</a>
         <a href="#rules">入住須知</a>
         <a href="#transport">交通資訊</a>
+        <a href="#local-attractions">在地景點</a>
     </nav>
 
     <div class="hero" id="hero">
@@ -285,7 +295,7 @@
         <div class="scroll-down">↓</div>
     </div>
 
-    <section id="about">
+    <section id="about" class="fade-in-up">
         <h2>關於我們</h2>
         <div class="about-grid">
             <div class="about-text">
@@ -293,14 +303,12 @@
                 <p>推開窗即可見富含鐵質的紅褐色岩層與清澈溪水，步行三分鐘即可抵達加九寮景觀大橋。在這裡，沒有城市的喧嘩，只有蟲鳴鳥叫與滿天星斗陪伴您的夜晚。</p>
             </div>
             <div class="about-img">
-                <!-- 圖片路徑已修改為相對路徑 -->
-                <img src="IMG20260502111432.jpg" alt="房源周邊峽谷景觀" class="zoomable">
+                <img src="file:///C:/IMG20260502111432.jpg" alt="房源周邊峽谷景觀" class="zoomable" loading="lazy">
             </div>
         </div>
     </section>
 
-    <!-- 房源空間與預訂按鈕 -->
-    <section id="spaces">
+    <section id="spaces" class="fade-in-up">
         <h2>房源空間預訂</h2>
         <div class="info-grid">
             <div class="info-card">
@@ -321,36 +329,32 @@
         </div>
     </section>
 
-    <section id="gallery">
+    <section id="gallery" class="fade-in-up">
         <h2>周邊景觀</h2>
         <div class="gallery-grid">
             <div class="card">
-                <!-- 圖片路徑已修改為相對路徑 -->
-                <img src="IMG20260718144835.jpg" alt="晴空加九寮景觀大橋" class="zoomable">
+                <img src="file:///C:/IMG20260718144835.jpg" alt="晴空加九寮景觀大橋" class="zoomable" loading="lazy">
                 <div class="card-content">
                     <h3>晴空加九寮景觀大橋</h3>
                     <p>橫跨溪谷的加九寮景觀大橋，是當地的指標性建築與絕佳拍照點。翠綠山林與紅色大橋形成強烈對比。</p>
                 </div>
             </div>
             <div class="card">
-                <!-- 圖片路徑已修改為相對路徑 -->
-                <img src="IMG20260718151845.jpg" alt="煙雨山林" class="zoomable">
+                <img src="file:///C:/IMG20260718151845.jpg" alt="煙雨山林" class="zoomable" loading="lazy">
                 <div class="card-content">
                     <h3>煙雨山林</h3>
                     <p>感受山區多變的氣候，細雨時分更顯靜謐，為溪谷帶來一種朦朧的自然之美。</p>
                 </div>
             </div>
             <div class="card">
-                <!-- 圖片路徑已修改為相對路徑 -->
-                <img src="IMG20240803130724.jpg" alt="溪谷聽泉" class="zoomable">
+                <img src="file:///C:/IMG20240803130724.jpg" alt="溪谷聽泉" class="zoomable" loading="lazy">
                 <div class="card-content">
                     <h3>溪谷聽泉</h3>
                     <p>緊鄰加九寮溪，水質清澈見底。夜間可聽潺潺流水聲入眠，清晨推窗即享森林浴。</p>
                 </div>
             </div>
             <div class="card">
-                <!-- 圖片路徑已修改為相對路徑 -->
-                <img src="IMG20240721182604.jpg" alt="壯麗全景" class="zoomable">
+                <img src="file:///C:/IMG20240721182604.jpg" alt="壯麗全景" class="zoomable" loading="lazy">
                 <div class="card-content">
                     <h3>壯麗全景</h3>
                     <p>從遠處眺望，壯麗的山谷地形與紅褐色岩層盡收眼底，展現大自然的鬼斧神工。</p>
@@ -359,7 +363,50 @@
         </div>
     </section>
 
-    <section id="local-attractions">
+    <section id="rules" class="fade-in-up">
+        <h2>入住須知與服務</h2>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>時間與餐飲</h3>
+                <ul>
+                    <li><strong>入住時間 (Check-in)：</strong>15:00 - 20:00（提供密碼鎖自助入住）</li>
+                    <li><strong>退房時間 (Check-out)：</strong>11:00 以前</li>
+                    <li><strong>餐飲資訊：</strong>本房源無提供早餐，配有簡易廚房設備供旅客使用，或可至周邊景點及烏來老街享用在地美食。</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>注意事項</h3>
+                <ul>
+                    <li>為維護住宿品質，室內全面禁止吸菸及嚼食檳榔。</li>
+                    <li>本房源位於自然保護區邊緣，晚間 22:00 後請降低音量，避免影響周遭生態與鄰居。</li>
+                    <li>提倡環保，不提供一次性盥洗用品（如牙刷、刮鬍刀），請自行攜帶。</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="transport" class="fade-in-up">
+        <h2>交通與聯繫</h2>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>聯繫方式</h3>
+                <ul>
+                    <li><strong>電話號碼：</strong>0900-XXX-XXX（請替換為您的電話）</li>
+                    <li><strong>電子郵件：</strong>example@email.com（請替換為您的信箱）</li>
+                    <li><strong>服務時間：</strong>09:00 - 21:00（若有預訂需求或問題歡迎來電、來信洽詢）</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>交通方式</h3>
+                <ul>
+                    <li><strong>大眾運輸：</strong>捷運新店站轉乘新店客運 849 路線，於「成功站」下車，步行 5 分鐘抵達。</li>
+                    <li><strong>自行開車：</strong>行駛台9甲線（新烏路），過日月光溫泉後於成功站旁右轉下坡，房源備有專屬停車位。</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="local-attractions" class="fade-in-up">
         <h2>探索烏來</h2>
         <div class="gallery-grid">
             <div class="card">
@@ -400,52 +447,15 @@
         </div>
     </section>
 
-    <section id="rules">
-        <h2>入住須知與服務</h2>
-        <div class="info-grid">
-            <div class="info-card">
-                <h3>時間與餐飲</h3>
-                <ul>
-                    <li><strong>入住時間 (Check-in)：</strong>15:00 - 20:00（提供密碼鎖自助入住）</li>
-                    <li><strong>退房時間 (Check-out)：</strong>11:00 以前</li>
-                    <li><strong>餐飲資訊：</strong>本房源無提供早餐，配有簡易廚房設備供旅客使用，或可至周邊景點及烏來老街享用在地美食。</li>
-                </ul>
-            </div>
-            <div class="info-card">
-                <h3>注意事項</h3>
-                <ul>
-                    <li>為維護住宿品質，室內全面禁止吸菸及嚼食檳榔。</li>
-                    <li>本房源位於自然保護區邊緣，晚間 22:00 後請降低音量，避免影響周遭生態與鄰居。</li>
-                    <li>提倡環保，不提供一次性盥洗用品（如牙刷、刮鬍刀），請自行攜帶。</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <section id="transport">
-        <h2>交通與聯繫</h2>
-        <div class="info-grid">
-            <div class="info-card">
-                <h3>聯繫方式</h3>
-                <ul>
-                    <li><strong>電話號碼：</strong>0900-XXX-XXX（請替換為您的電話）</li>
-                    <li><strong>電子郵件：</strong>example@email.com（請替換為您的信箱）</li>
-                    <li><strong>服務時間：</strong>09:00 - 21:00（若有預訂需求或問題歡迎來電、來信洽詢）</li>
-                </ul>
-            </div>
-            <div class="info-card">
-                <h3>交通方式</h3>
-                <ul>
-                    <li><strong>大眾運輸：</strong>捷運新店站轉乘新店客運 849 路線，於「成功站」下車，步行 5 分鐘抵達。</li>
-                    <li><strong>自行開車：</strong>行駛台9甲線（新烏路），過日月光溫泉後於成功站旁右轉下坡，房源備有專屬停車位。</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
     <footer>
         <p>&copy; 2026 紅河谷秘境. All rights reserved.</p>
     </footer>
+
+    <!-- 圖片放大的隱藏區塊 -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="modal-close">&times;</span>
+        <img class="modal-content" id="zoomedImg" alt="放大檢視圖片">
+    </div>
 
     <!-- JavaScript 區塊 -->
     <script>
@@ -463,6 +473,28 @@
         function closeModal() {
             modal.style.display = "none";
         }
+
+        // ----- Intersection Observer for Lazy Loading 動畫 -----
+        document.addEventListener("DOMContentLoaded", function() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 // 當元素露出 15% 時觸發動畫
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // 觸發後即解除觀察，節省效能
+                    }
+                });
+            }, observerOptions);
+
+            // 選擇所有需要延遲顯現的元素區塊
+            const fadeElements = document.querySelectorAll('.fade-in-up');
+            fadeElements.forEach(el => observer.observe(el));
+        });
     </script>
 </body>
 </html>
