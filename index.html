@@ -51,7 +51,7 @@
 
         .hero {
             height: 100vh;
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('file:///C:/IMG20260502111417.jpg') no-repeat center center;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('IMG20260502111417.jpg') no-repeat center center;
             background-size: cover;
             background-attachment: fixed;
             display: flex;
@@ -110,6 +110,8 @@
             object-fit: cover;
             cursor: pointer; 
             transition: opacity 0.3s;
+            position: relative;
+            z-index: 10;
         }
         .about-img img:hover {
             opacity: 0.9;
@@ -139,6 +141,8 @@
             object-fit: cover;
             cursor: pointer; 
             transition: opacity 0.3s;
+            position: relative;
+            z-index: 10;
         }
         .card img:hover {
             opacity: 0.9;
@@ -256,6 +260,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
+            z-index: 2001;
         }
         .modal-close:hover {
             color: #cc3333;
@@ -284,9 +289,9 @@
         <a href="#about">關於我們</a>
         <a href="#spaces">房源空間</a>
         <a href="#gallery">周邊景觀</a>
+        <a href="#local-attractions">在地景點</a>
         <a href="#rules">入住須知</a>
         <a href="#transport">交通資訊</a>
-        <a href="#local-attractions">在地景點</a>
     </nav>
 
     <div class="hero" id="hero">
@@ -303,7 +308,7 @@
                 <p>推開窗即可見富含鐵質的紅褐色岩層與清澈溪水，步行三分鐘即可抵達加九寮景觀大橋。在這裡，沒有城市的喧嘩，只有蟲鳴鳥叫與滿天星斗陪伴您的夜晚。</p>
             </div>
             <div class="about-img">
-                <img src="file:///C:/IMG20260502111432.jpg" alt="房源周邊峽谷景觀" class="zoomable" loading="lazy">
+                <img src="IMG20260502111432.jpg" alt="房源周邊峽谷景觀" class="zoomable" loading="lazy">
             </div>
         </div>
     </section>
@@ -333,28 +338,28 @@
         <h2>周邊景觀</h2>
         <div class="gallery-grid">
             <div class="card">
-                <img src="file:///C:/IMG20260718144835.jpg" alt="晴空加九寮景觀大橋" class="zoomable" loading="lazy">
+                <img src="IMG20260718144835.jpg" alt="晴空加九寮景觀大橋" class="zoomable" loading="lazy">
                 <div class="card-content">
                     <h3>晴空加九寮景觀大橋</h3>
                     <p>橫跨溪谷的加九寮景觀大橋，是當地的指標性建築與絕佳拍照點。翠綠山林與紅色大橋形成強烈對比。</p>
                 </div>
             </div>
             <div class="card">
-                <img src="file:///C:/IMG20260718151845.jpg" alt="煙雨山林" class="zoomable" loading="lazy">
+                <img src="IMG20260718151845.jpg" alt="煙雨山林" class="zoomable" loading="lazy">
                 <div class="card-content">
                     <h3>煙雨山林</h3>
                     <p>感受山區多變的氣候，細雨時分更顯靜謐，為溪谷帶來一種朦朧的自然之美。</p>
                 </div>
             </div>
             <div class="card">
-                <img src="file:///C:/IMG20240803130724.jpg" alt="溪谷聽泉" class="zoomable" loading="lazy">
+                <img src="IMG20240803130724.jpg" alt="溪谷聽泉" class="zoomable" loading="lazy">
                 <div class="card-content">
                     <h3>溪谷聽泉</h3>
                     <p>緊鄰加九寮溪，水質清澈見底。夜間可聽潺潺流水聲入眠，清晨推窗即享森林浴。</p>
                 </div>
             </div>
             <div class="card">
-                <img src="file:///C:/IMG20240721182604.jpg" alt="壯麗全景" class="zoomable" loading="lazy">
+                <img src="IMG20240721182604.jpg" alt="壯麗全景" class="zoomable" loading="lazy">
                 <div class="card-content">
                     <h3>壯麗全景</h3>
                     <p>從遠處眺望，壯麗的山谷地形與紅褐色岩層盡收眼底，展現大自然的鬼斧神工。</p>
@@ -452,8 +457,8 @@
     </footer>
 
     <!-- 圖片放大的隱藏區塊 -->
-    <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="modal-close">&times;</span>
+    <div id="imageModal" class="modal">
+        <span class="modal-close" id="modalCloseBtn">&times;</span>
         <img class="modal-content" id="zoomedImg" alt="放大檢視圖片">
     </div>
 
@@ -461,37 +466,47 @@
     <script>
         const modal = document.getElementById("imageModal");
         const modalImg = document.getElementById("zoomedImg");
-        const images = document.querySelectorAll(".zoomable");
+        const closeBtn = document.getElementById("modalCloseBtn");
 
-        images.forEach(img => {
-            img.onclick = function() {
-                modal.style.display = "block";
-                modalImg.src = this.src;
-            }
-        });
-
-        function closeModal() {
-            modal.style.display = "none";
-        }
-
-        // ----- Intersection Observer for Lazy Loading 動畫 -----
+        // 確保 DOM 載入後再綁定事件
         document.addEventListener("DOMContentLoaded", function() {
+            
+            // 使用事件委派 (Event Delegation) 綁定圖片點擊事件
+            document.body.addEventListener('click', function(e) {
+                if (e.target.classList.contains('zoomable')) {
+                    modal.style.display = "block";
+                    modalImg.src = e.target.src;
+                }
+            });
+
+            // 關閉 Modal 的方式：點擊右上角 X
+            closeBtn.onclick = function() {
+                modal.style.display = "none";
+            }
+            
+            // 關閉 Modal 的方式：點擊黑色背景
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            // ----- Intersection Observer for Lazy Loading 動畫 -----
             const observerOptions = {
                 root: null,
                 rootMargin: '0px',
-                threshold: 0.15 // 當元素露出 15% 時觸發動畫
+                threshold: 0.15 
             };
 
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('is-visible');
-                        observer.unobserve(entry.target); // 觸發後即解除觀察，節省效能
+                        observer.unobserve(entry.target);
                     }
                 });
             }, observerOptions);
 
-            // 選擇所有需要延遲顯現的元素區塊
             const fadeElements = document.querySelectorAll('.fade-in-up');
             fadeElements.forEach(el => observer.observe(el));
         });
