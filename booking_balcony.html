@@ -223,46 +223,6 @@
         .dot.selected { background: var(--selected-blue); }
         .dot.booked { background: #eaeaea; border: 1px solid #a0a0a0; }
 
-        /* ----- 時段選擇器樣式 ----- */
-        .time-picker-wrapper {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .time-picker-wrapper h4 {
-            text-align: center;
-            color: var(--text-dark);
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-        .time-options {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .time-option {
-            padding: 10px 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: #fff;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: 700;
-            color: var(--stone-gray);
-            user-select: none;
-        }
-        .time-option:hover {
-            border-color: var(--primary-red);
-            color: var(--primary-red);
-        }
-        .time-option.active {
-            background-color: var(--primary-red);
-            color: #fff;
-            border-color: var(--primary-red);
-        }
-
         /* ----- 預訂表單樣式 ----- */
         .form-wrapper {
             background: #fff;
@@ -360,7 +320,7 @@
 
     <section id="booking-section" class="booking-section">
         <h2>預訂狀況與資料填寫 - <span class="room-name" id="roomTitleName">陽台</span></h2>
-        <p style="text-align:center; margin-bottom:30px;">請在左側日曆依序點選「入住日期」與「退房日期」，並選擇預訂時段。</p>
+        <p style="text-align:center; margin-bottom:30px;">請在左側日曆依序點選「入住日期」與「退房日期」。若僅預訂單日，請在同一日期上點擊兩次。</p>
         
         <div class="booking-container">
             <!-- 左側：單一月份日曆 -->
@@ -378,16 +338,6 @@
                     <div class="legend-item"><div class="dot selected"></div>已選擇期間</div>
                     <div class="legend-item"><div class="dot booked"></div>已客滿</div>
                 </div>
-
-                <!-- 時段選擇器區塊 -->
-                <div class="time-picker-wrapper">
-                    <h4>選擇預訂時段</h4>
-                    <div class="time-options">
-                        <div class="time-option" data-value="全天">全天</div>
-                        <div class="time-option" data-value="上半天">上半天</div>
-                        <div class="time-option" data-value="下半天">下半天</div>
-                    </div>
-                </div>
             </div>
 
             <!-- 右側：資料填寫表單 (串接 FormSubmit) -->
@@ -397,7 +347,7 @@
                     <!-- FormSubmit 隱藏設定 -->
                     <input type="hidden" name="_subject" value="【紅河谷秘境】新預訂需求：陽台">
                     <input type="hidden" name="_captcha" value="false">
-                    <input type="hidden" name="_next" value="">
+                    <input type="hidden" name="_next" value=""> <!-- 若要有自訂感謝頁可填入網址 -->
 
                     <div class="form-group">
                         <label for="bookingSpace">預訂房源</label>
@@ -407,14 +357,12 @@
                     <div class="date-range-display">
                         <div><span>入住日期：</span><span id="checkInText">未選擇</span></div>
                         <div><span>退房日期：</span><span id="checkOutText">未選擇</span></div>
-                        <div><span>預訂時段：</span><span id="timeRangeText">未選擇</span></div>
-                        <div><span>預訂天數：</span><span id="nightsText">0 天</span></div>
+                        <div><span>預訂天數：</span><span id="nightsText">0 晚</span></div>
                     </div>
 
-                    <!-- 隱藏的輸入欄位供表單送出 -->
+                    <!-- 隱藏的日期輸入欄位供表單送出 -->
                     <input type="hidden" id="checkInDate" name="入住日期">
                     <input type="hidden" id="checkOutDate" name="退房日期">
-                    <input type="hidden" id="selectedTimeRange" name="預訂時段">
                     <input type="hidden" id="bookingNights" name="預訂天數">
 
                     <div class="form-group">
@@ -454,24 +402,9 @@
         // 選擇範圍狀態：startDate, endDate
         let startDate = null;
         let endDate = null;
-        let selectedTime = null;
 
         const gridElement = document.getElementById('calendarGrid');
         const titleElement = document.getElementById('monthYear');
-        const timeOptions = document.querySelectorAll('.time-option');
-
-        // 時段選擇邏輯
-        timeOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                // 移除所有 active class
-                timeOptions.forEach(opt => opt.classList.remove('active'));
-                // 加上當前點擊的 active class
-                this.classList.add('active');
-                // 儲存選擇的值
-                selectedTime = this.dataset.value;
-                updateFormDisplay();
-            });
-        });
 
         function formatDate(year, month, day) {
             return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -535,7 +468,7 @@
                     }
                     if (endDate && dateString === endDate) {
                         dayDiv.classList.add('selected-end');
-                        statusSpan.textContent = '退房';
+                        statusSpan.textContent = (startDate === endDate) ? '單日' : '退房';
                     }
                     if (startDate && endDate && dateString > startDate && dateString < endDate) {
                         dayDiv.classList.add('in-range');
@@ -558,8 +491,8 @@
                 endDate = null;
             } else if (startDate && !endDate) {
                 // 第二下：選擇退房日期
-                if (dateStr <= startDate) {
-                    // 若點選早於或等於入住日，自動重新設為新的入住日
+                if (dateStr < startDate) {
+                    // 若點選早於入住日，自動重新設為新的入住日
                     startDate = dateStr;
                     endDate = null;
                 } else {
@@ -594,22 +527,10 @@
         function updateFormDisplay() {
             const checkInText = document.getElementById('checkInText');
             const checkOutText = document.getElementById('checkOutText');
-            const timeRangeText = document.getElementById('timeRangeText');
             const nightsText = document.getElementById('nightsText');
-            
             const checkInInput = document.getElementById('checkInDate');
             const checkOutInput = document.getElementById('checkOutDate');
-            const timeRangeInput = document.getElementById('selectedTimeRange');
             const bookingNightsInput = document.getElementById('bookingNights');
-
-            // 更新時段顯示
-            if (selectedTime) {
-                timeRangeText.textContent = selectedTime;
-                timeRangeInput.value = selectedTime;
-            } else {
-                timeRangeText.textContent = '未選擇';
-                timeRangeInput.value = '';
-            }
 
             if (startDate) {
                 checkInText.textContent = startDate;
@@ -623,21 +544,23 @@
                 checkOutText.textContent = endDate;
                 checkOutInput.value = endDate;
 
-                // 計算天數 (改為天，因為有半天全天的概念)
+                // 計算天數
                 const start = parseDate(startDate);
                 const end = parseDate(endDate);
                 const diffTime = Math.abs(end - start);
-                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
-                // 如果只選一天
-                if(diffDays === 0) diffDays = 1;
-
-                nightsText.textContent = `${diffDays} 天`;
-                bookingNightsInput.value = `${diffDays} 天`;
+                if (diffDays === 0) {
+                    nightsText.textContent = `單日`;
+                    bookingNightsInput.value = `單日`;
+                } else {
+                    nightsText.textContent = `${diffDays} 晚`;
+                    bookingNightsInput.value = `${diffDays} 晚`;
+                }
             } else {
                 checkOutText.textContent = startDate ? '請點選退房日期' : '未選擇';
                 checkOutInput.value = '';
-                nightsText.textContent = '0 天';
+                nightsText.textContent = '0 晚';
                 bookingNightsInput.value = '';
             }
         }
@@ -660,21 +583,14 @@
             renderCalendar(currentMonth, currentYear);
         });
 
-        // 表單送出前檢查日期與時段是否有選擇
+        // 表單送出前檢查日期是否有選擇
         document.getElementById('reservationForm').addEventListener('submit', function(e) {
             const checkIn = document.getElementById('checkInDate').value;
             const checkOut = document.getElementById('checkOutDate').value;
-            const timeRange = document.getElementById('selectedTimeRange').value;
             
             if(!checkIn || !checkOut) {
-                e.preventDefault(); 
-                alert('請先在日曆上依序點選「入住」與「退房」日期！');
-                return;
-            }
-            if(!timeRange) {
-                e.preventDefault();
-                alert('請選擇預訂時段（全天、上半天或下半天）！');
-                return;
+                e.preventDefault(); // 阻止表單送出
+                alert('請先在日曆上點選選擇完整的入住與退房日期！');
             }
         });
 
