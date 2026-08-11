@@ -354,7 +354,7 @@
 
     <section id="booking-section" class="booking-section">
         <h2>預訂狀況與資料填寫 - <span class="room-name" id="roomTitleName">停車場</span></h2>
-        <p style="text-align:center; margin-bottom:30px;">請在左側日曆依序點選「入場日期」與「出場日期」，並選擇預訂時段。</p>
+        <p style="text-align:center; margin-bottom:30px;">請在左側日曆依序點選「入場日期」與「出場日期」，並選擇預訂時段。若僅預訂單日，請在同一日期上點擊兩次。</p>
         
         <div class="booking-container">
             <!-- 左側：單一月份日曆 -->
@@ -536,7 +536,7 @@
                     }
                     if (endDate && dateString === endDate) {
                         dayDiv.classList.add('selected-end');
-                        statusSpan.textContent = '出場';
+                        statusSpan.textContent = (startDate === endDate) ? '單日' : '出場';
                     }
                     if (startDate && endDate && dateString > startDate && dateString < endDate) {
                         dayDiv.classList.add('in-range');
@@ -559,8 +559,8 @@
                 endDate = null;
             } else if (startDate && !endDate) {
                 // 第二下：選擇退房日期
-                if (dateStr <= startDate) {
-                    // 若點選早於或等於入住日，自動重新設為新的入住日
+                if (dateStr < startDate) {
+                    // 若點選早於入住日，自動重新設為新的入住日
                     startDate = dateStr;
                     endDate = null;
                 } else {
@@ -627,8 +627,14 @@
                 const end = parseDate(endDate);
                 const diffTime = Math.abs(end - start);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                nightsText.textContent = `${diffDays} 天`;
-                bookingNightsInput.value = `${diffDays} 天`;
+                
+                if (diffDays === 0) {
+                    nightsText.textContent = `單日`;
+                    bookingNightsInput.value = `單日`;
+                } else {
+                    nightsText.textContent = `${diffDays} 天`;
+                    bookingNightsInput.value = `${diffDays} 天`;
+                }
             } else {
                 checkOutText.textContent = startDate ? '請點選出場日期' : '未選擇';
                 checkOutInput.value = '';
