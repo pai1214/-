@@ -1,4 +1,4 @@
-code_index = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -251,6 +251,10 @@ code_index = """<!DOCTYPE html>
             cursor: pointer;
             transition: opacity 0.3s;
         }
+        /* 如果只有一張圖片，讓它填滿寬度 */
+        .info-card-images img:only-child {
+            width: 100%;
+        }
         .info-card-images img:hover {
             opacity: 0.8;
         }
@@ -357,12 +361,16 @@ code_index = """<!DOCTYPE html>
             </div>
             <div class="info-card">
                 <h3>🌅 陽台</h3>
+                <!-- 新增陽台圖片預覽 -->
+                <div class="info-card-images">
+                    <img src="IMG_20260812_205854.jpg" alt="專屬景觀陽台" class="zoomable" loading="lazy">
+                </div>
                 <p>專屬的戶外景觀陽台，直面紅河谷的壯麗溪谷。適合在此品茗、閱讀，夜晚更能無光害地仰望滿天星斗。</p>
                 <a href="booking_balcony.html" class="btn-book">前往預訂陽台</a>
             </div>
             <div class="info-card">
                 <h3>🚗 停車場</h3>
-                <!-- 新增停車場圖片預覽 -->
+                <!-- 停車場圖片預覽 -->
                 <div class="info-card-images">
                     <img src="1786539477428.jpg" alt="停車場景觀" class="zoomable" loading="lazy">
                     <img src="IMG_20260812_205914.jpg" alt="停車場空間" class="zoomable" loading="lazy">
@@ -552,6 +560,3 @@ code_index = """<!DOCTYPE html>
     </script>
 </body>
 </html>
-"""
-with open('index.html', 'w', encoding='utf-8') as f:
-    f.write(code_index)
