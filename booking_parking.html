@@ -53,13 +53,26 @@
             font-family: 'Montserrat', sans-serif;
             font-size: 2.2rem;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             color: var(--primary-red);
             font-weight: 700;
             letter-spacing: 2px;
         }
         h2 .room-name {
             color: var(--deep-green);
+        }
+
+        .subtitle-desc {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .price-badge {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            color: var(--warning-orange);
+            font-size: 1.1rem;
         }
 
         /* ----- 預訂區塊整體佈局 (左右排版) ----- */
@@ -354,7 +367,8 @@
 
     <section id="booking-section" class="booking-section">
         <h2>預訂狀況與資料填寫 - <span class="room-name" id="roomTitleName">停車場</span></h2>
-        <p style="text-align:center; margin-bottom:30px;">請在左側日曆依序點選「入場日期」與「出場日期」，並選擇預訂時段。若僅預訂單日，請在同一日期上點擊兩次。</p>
+        <p class="subtitle-desc">請在左側日曆依序點選「入場日期」與「出場日期」，並選擇預訂時段。若僅預訂單日，請在同一日期上點擊兩次。</p>
+        <p class="price-badge">💡 停車費率：每小時 20 元 (單日最高 180 元)</p>
         
         <div class="booking-container">
             <!-- 左側：單一月份日曆 -->
@@ -402,14 +416,16 @@
                         <div><span>入場日期：</span><span id="checkInText">未選擇</span></div>
                         <div><span>出場日期：</span><span id="checkOutText">未選擇</span></div>
                         <div><span>預訂時段：</span><span id="timeRangeText">未選擇</span></div>
-                        <div><span>預訂天數：</span><span id="nightsText">0 天</span></div>
+                        <div><span>預估時數：</span><span id="hoursText">0 小時</span></div>
+                        <div><span>預估費用：</span><span id="totalPriceText">NT$ 0</span></div>
                     </div>
 
                     <!-- 隱藏的日期與時間輸入欄位供表單送出 -->
                     <input type="hidden" id="checkInDate" name="入場日期">
                     <input type="hidden" id="checkOutDate" name="出場日期">
                     <input type="hidden" id="selectedTimeRange" name="預訂時段">
-                    <input type="hidden" id="bookingNights" name="預訂天數">
+                    <input type="hidden" id="bookingHours" name="預估時數">
+                    <input type="hidden" id="totalPrice" name="預估費用">
 
                     <div class="form-group">
                         <label for="userName">姓名</label>
@@ -596,12 +612,14 @@
             const checkInText = document.getElementById('checkInText');
             const checkOutText = document.getElementById('checkOutText');
             const timeRangeText = document.getElementById('timeRangeText');
-            const nightsText = document.getElementById('nightsText');
+            const hoursText = document.getElementById('hoursText');
+            const priceText = document.getElementById('totalPriceText');
             
             const checkInInput = document.getElementById('checkInDate');
             const checkOutInput = document.getElementById('checkOutDate');
             const timeRangeInput = document.getElementById('selectedTimeRange');
-            const bookingNightsInput = document.getElementById('bookingNights');
+            const bookingHoursInput = document.getElementById('bookingHours');
+            const totalPriceInput = document.getElementById('totalPrice');
 
             const sTime = startTimeSelect.value;
             const eTime = endTimeSelect.value;
@@ -622,24 +640,62 @@
                 checkOutText.textContent = endDate;
                 checkOutInput.value = endDate;
 
-                // 計算天數
+                // 計算時數與費用
                 const start = parseDate(startDate);
                 const end = parseDate(endDate);
-                const diffTime = Math.abs(end - start);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const diffDays = Math.round(Math.abs(end - start) / (1000 * 60 * 60 * 24));
                 
-                if (diffDays === 0) {
-                    nightsText.textContent = `單日`;
-                    bookingNightsInput.value = `單日`;
+                let sH = parseInt(sTime.split(':')[0]);
+                let eH = eTime === '23:59' ? 24 : parseInt(eTime.split(':')[0]);
+                
+                let totalHours = (diffDays * 24) + (eH - sH);
+                
+                if (totalHours > 0) {
+                    hoursText.textContent = `${totalHours} 小時`;
+                    hoursText.style.color = 'inherit';
+                    bookingHoursInput.value = `${totalHours} 小時`;
+                    
+                    let totalCost = 0;
+                    
+                    // 單日預訂
+                    if (diffDays === 0) {
+                        totalCost = Math.min(totalHours * 20, 180);
+                    } 
+                    // 跨日預訂：計算每天的費用 (首日 + 中間全天 + 末日)
+                    else {
+                        // 首日費用
+                        const firstDayHours = 24 - sH;
+                        totalCost += Math.min(firstDayHours * 20, 180);
+                        
+                        // 中間全天費用
+                        if (diffDays > 1) {
+                            totalCost += (diffDays - 1) * 180;
+                        }
+                        
+                        // 末日費用
+                        if (eH > 0) {
+                             totalCost += Math.min(eH * 20, 180);
+                        }
+                    }
+
+                    priceText.textContent = `NT$ ${totalCost}`;
+                    totalPriceInput.value = totalCost;
                 } else {
-                    nightsText.textContent = `${diffDays} 天`;
-                    bookingNightsInput.value = `${diffDays} 天`;
+                    hoursText.textContent = `時段無效`;
+                    hoursText.style.color = 'var(--primary-red)';
+                    bookingHoursInput.value = `時段無效`;
+                    
+                    priceText.textContent = `NT$ 0`;
+                    totalPriceInput.value = 0;
                 }
             } else {
                 checkOutText.textContent = startDate ? '請點選出場日期' : '未選擇';
                 checkOutInput.value = '';
-                nightsText.textContent = '0 天';
-                bookingNightsInput.value = '';
+                hoursText.textContent = '0 小時';
+                hoursText.style.color = 'inherit';
+                bookingHoursInput.value = '';
+                priceText.textContent = 'NT$ 0';
+                totalPriceInput.value = '';
             }
         }
 
@@ -665,10 +721,18 @@
         document.getElementById('reservationForm').addEventListener('submit', function(e) {
             const checkIn = document.getElementById('checkInDate').value;
             const checkOut = document.getElementById('checkOutDate').value;
+            const hours = document.getElementById('bookingHours').value;
             
             if(!checkIn || !checkOut) {
                 e.preventDefault(); 
                 alert('請先在日曆上依序點選「入場」與「出場」日期！');
+                return;
+            }
+
+            if(hours === '時段無效') {
+                e.preventDefault(); 
+                alert('出場時間必須晚於入場時間，請重新選擇預訂時段！');
+                return;
             }
         });
 
